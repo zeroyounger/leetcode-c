@@ -2255,3 +2255,248 @@ int findIntegers(int num){
     }
     return sum+1;
 }
+
+//605
+bool canPlaceFlowers(int* flowerbed, int flowerbedSize, int n){
+    int i, len0=0, num=0;
+    if(flowerbedSize==1&&flowerbed[0]==0) return true;
+    for(i=0;i<flowerbedSize;i++){
+        if(flowerbed[i]==0){
+            len0++;
+            if((i==1||i==flowerbedSize-1) && len0>=2){
+                num++;
+                len0=1;
+            }
+            else if(len0==3){
+                num++;
+                len0=1;   
+            }  
+        }
+        else len0=0;
+    }
+    if(num>=n) return true;
+    else return false;
+}
+
+//617
+struct TreeNode* mergeTrees(struct TreeNode* t1, struct TreeNode* t2){
+    if (!t1){return t2;}
+    if (!t2){return t1;}
+    t1->val +=t2->val;
+    t1->left=mergeTrees(t1->left,t2->left);
+    t1->right=mergeTrees(t1->right,t2->right);
+    return t1;
+}
+
+//628
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+int cmp(const void *a, const void *b){ return *(int*)a > *(int*)b;}
+int maximumProduct(int* nums, int numsSize){
+    qsort(nums, numsSize, sizeof(nums[0]), cmp);
+    return max(nums[0]*nums[1]*nums[numsSize-1],nums[numsSize-3]*nums[numsSize-2]*nums[numsSize-1]);
+}
+
+//633
+bool judgeSquareSum(int c){
+    double L = sqrt(c);
+    for(int i=0;i<=L;i++){
+        double a=sqrt(c-i*i);
+        if((int)a==a)
+            return true;
+    }
+    return false;
+}
+
+//637
+#define MAX_LEVELS 1500
+#define MAX_NUM 10000
+double* averageOfLevels(struct TreeNode* root, int* returnSize){
+    double* tempResult = (double*)malloc(MAX_LEVELS * sizeof(double));
+    struct TreeNode** tempQueue = (struct TreeNode**)malloc(MAX_NUM * sizeof(struct TreeNode*));
+    int in = 0;
+    int out = 0;
+    tempQueue[0] = root;
+    in++;
+    int flag  = in;
+    double sumOfLevel = 0;
+    int cntOfLevel = 0;
+    int cnt = 0;
+    while (out < in) {
+        sumOfLevel += tempQueue[out]->val;
+        cntOfLevel++;
+        if (tempQueue[out]->left != NULL)
+            tempQueue[in++] = tempQueue[out]->left;
+        if (tempQueue[out]->right != NULL)
+            tempQueue[in++] = tempQueue[out]->right;
+        out++;
+        if (flag == out) {
+            tempResult[cnt++] = sumOfLevel/(double)cntOfLevel;
+            sumOfLevel = 0;
+            cntOfLevel = 0;
+            flag = in;
+        }
+    }
+    double* result = (double*)malloc(cnt * sizeof(double));
+    memcpy(result, tempResult, cnt * sizeof(double));
+    *returnSize = cnt;
+    free(tempResult);
+    free(tempQueue);
+    return result;
+}
+
+//643
+double findMaxAverage(int* nums, int numsSize, int k) {
+    double m;
+    long sum = 0,temp;
+    for(int i = 0;i < k;i++)
+        sum = sum + nums[i];
+    temp = sum;
+    for(int i = k;i < numsSize;i++){
+        temp = temp - nums[i-k] + nums[i];
+        if(sum < temp)
+            sum = temp;
+    }
+    m = (double) sum / k;
+    return m;
+}
+
+//645
+int* findErrorNums(int* nums, int numsSize, int* returnSize) {
+    int *result=(int*)malloc(2*sizeof(int));
+    int *count=calloc(numsSize+1,sizeof(int));
+    int i,rep,sum=0,lost;
+    for(i=0;i<numsSize;i++){
+        count[nums[i]]++;
+        if(2==count[nums[i]])
+            rep=nums[i];
+        sum=sum+nums[i];
+    }
+    lost=numsSize*(numsSize+1)/2-(sum-rep);
+    result[0]=rep;
+    result[1]=lost;
+    *returnSize=2;
+    return result;
+}
+
+//647
+int countSubstrings(char * s){
+    int len = strlen(s);
+    int* dp = (int*)malloc(sizeof(int)*len);
+    int cnt= 0;
+    for(int i = 0; i < len; i++){
+        dp[i] = 1;
+        cnt++;
+        for(int j = 0; j < i; j++){
+            if(s[j] == s[i] && dp[j+1] == 1){
+                dp[j]= 1;
+                cnt++;
+            }else{
+                dp[j] = 0;
+            }
+        }
+    }    
+    return cnt;
+}
+
+//653
+int gk = 0;
+struct TreeNode * groot = NULL;
+bool gret = false;
+void find (struct TreeNode * root, int n){
+    if (root == NULL){return ;}
+    if (root->val == n){
+        gret = true;
+        return;
+    }
+    find((n > root->val)?root->right:root->left, n);
+}
+void dfs(struct TreeNode * root){
+    if (root == NULL || gret){return;}
+    int diff = gk - root->val;
+    if (diff != root->val)
+        find(groot, diff);
+    dfs(root->left);
+    dfs(root->right);
+}
+bool findTarget(struct TreeNode* root, int k){
+    groot = root;
+    gk = k;
+    gret = false;
+    dfs(root);
+    return gret;
+}
+
+//657
+bool judgeCircle(char * moves) {
+    char c;
+    int x = 0, y = 0;
+    while ((c = *moves++) != '\0') {
+        switch(c) {
+            case 'L': --x; break;
+            case 'R': ++x; break;
+            case 'D': --y; break;
+            case 'U': ++y; break;
+        }
+    }
+    return x == 0 && y == 0;
+}
+
+//661
+int diff[8][2] = {{-1,0},{-1,1},{0,1},{1,1},{1,0},{1,-1},{0,-1},{-1,-1}};
+int getR(int** M, int x, int y, int X, int Y) {
+    int i;
+    int sum = M[x][y];
+    int c = 1;
+    for(i = 0; i < 8; i++)
+        if(x + diff[i][0] >= 0 && x + diff[i][0] < X && \
+           y + diff[i][1] >= 0 && y + diff[i][1] < Y) { 
+            sum += M[x + diff[i][0]][y + diff[i][1]];
+            c++;
+        }
+    return sum /= c;
+}
+ 
+int** imageSmoother(int** M, int MSize, int* MColSize, int* returnSize, int** returnColumnSizes){
+    int i, j;
+    int **R = malloc(sizeof(int *) * MSize);
+    *returnColumnSizes =  malloc(sizeof(int) * MSize);
+    for(i = 0; i < MSize; i++) {
+        R[i] = malloc(sizeof(int) * *MColSize);
+        (*returnColumnSizes)[i] = *MColSize;
+    }
+    for(i = 0;i < MSize; i++) {
+        for(j = 0; j < *MColSize; j++)
+            R[i][j] = getR(M, i, j, MSize, *MColSize);
+    }
+    *returnSize = MSize;
+    return R;
+}
+
+//665
+bool checkPossibility(int* nums, int numsSize){
+    if(numsSize <= 2) return true;
+    int res = 0;
+    if(nums[0] > nums[1]){
+        res++;
+        nums[0] = nums[1];
+    }
+    for(int i=1;i<numsSize-1;i++){
+        if(nums[i] > nums[i+1]){
+            res++;
+            if(res > 1) return false;
+            else if(nums[i-1] > nums[i+1]) nums[i+1] = nums[i];
+            else nums[i] = nums[i-1];
+        }
+    }
+    return true;
+}
+
+//669
+struct TreeNode* trimBST(struct TreeNode* root, int L, int R){
+    if(root==NULL) return root;
+    if(L>root->val) return trimBST(root->right,L,R);
+    if(R<root->val) return trimBST(root->left,L,R);
+    root->left=trimBST(root->left,L,R);
+    root->right=trimBST(root->right,L,R);
+    return root;
+}
