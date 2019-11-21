@@ -1447,3 +1447,564 @@ int arrangeCoins(int n){
     }
     return i-1;
 }
+
+//443
+int compress(char* chars, int charsSize){
+    int i;
+    int j;
+    int len;
+    int begin = 1;
+    int count = 1;
+    char num[10];
+    for (i = 0; i < charsSize; i++) {
+        if ((i != charsSize - 1) && (chars[i] == chars[i + 1])) {
+            count++;
+            continue;
+        }
+        if ((i == charsSize - 1) || (chars[i] != chars[i + 1])) {
+            if (count > 1) {
+                sprintf(num, "%d", count);
+                len = strlen(num);
+                for (j = 0; j < len; j++) {
+                    chars[begin] = num[j];
+                    begin++;
+                }
+                count = 1;
+            }
+            if (i != charsSize - 1) {
+                chars[begin] = chars[i+1];
+                begin++;           
+            }
+        }
+    }
+    return begin;
+}
+
+//447
+int cmp(const void *a, const void *b){
+    return *(int*)a - *(int*)b;
+}
+int numberOfBoomerangs(int** points, int pointsSize, int* pointsColSize){
+    if (pointsSize < 2) return 0;
+    int i, j, k, l, m, n, count = 0;
+    int lineSize = pointsSize-1;
+    int *lines = malloc(sizeof(int)*lineSize);
+    for (i = 0; i < pointsSize; ++i) {
+        k = 0;
+        for (j = 0; j < pointsSize; ++j) {
+            if (i == j) continue;
+            lines[k++] = pow(points[i][0]-points[j][0], 2)+pow(points[i][1]-points[j][1], 2);
+        }
+        qsort(lines, lineSize, sizeof(int), cmp);
+        m = lines[0];
+        n = 1;
+        for (l = 1; l < lineSize; ++l) {
+            if (lines[l] != m) {
+                if (n >= 2) count += n*(n-1);
+                m = lines[l];
+                n = 1;
+            }else{
+                ++n;
+            }
+        }
+        if (n >= 2) count += n*(n-1);
+    }
+    
+    free(lines);
+    return count;
+}
+
+//448
+int* findDisappearedNumbers(int* nums, int numsSize, int* returnSize){
+    int i,j;
+    for(i=0;i<numsSize;i++)
+        nums[abs(nums[i])-1]=-abs(nums[abs(nums[i])-1]);    
+    for(i=0,j=0;i<numsSize;i++)
+        if(nums[i]>0)
+            nums[j++]=i+1;    
+    *returnSize=j;
+    return nums;
+}
+
+//453
+int minMoves(int* nums, int numsSize){
+    long sum = 0,min = nums[0];
+    for(int i = 0;i < numsSize;i++){
+        sum = sum + nums[i];
+        if(min > nums[i])
+            min = nums[i];
+    }
+    return sum - min * numsSize;
+}
+
+//455
+int cmp(const void* a, const void* b){
+    return *(int*)a > *(int*)b;
+}
+
+int findContentChildren(int* g, int gSize, int* s, int sSize){
+    qsort(g, gSize, sizeof(int), cmp);
+    qsort(s, sSize, sizeof(int), cmp);
+    int i = 0, j = 0, ans = 0;
+    while(i < gSize && j < sSize){
+        if(g[i] <= s[j]){
+            ans++;
+            i++;
+            j++;
+        }else
+            j++;
+    }
+    return ans;
+}
+
+
+//459
+bool repeatedSubstringPattern(char * s){
+    int len = strlen(s);
+    int *next = (int*)malloc((len + 1) * sizeof(int));
+    memset(next, 0, (len + 1) * sizeof(int));
+    next[0] = -1;
+    int k = -1;
+    int j = 0;
+    while (j < len){
+        if (k == -1 || s[j] == s[k]){
+            ++j;
+            ++k;
+            next[j] = k;
+        } else {
+            k = next[k];
+        }
+    }
+    return next[len] && len % (len - next[len]) == 0;
+}
+
+//461
+int hammingDistance(int x, int y){
+    int sum = x^y;
+    int count = 0;
+    while (sum){
+        sum = sum & sum - 1;
+        count++;
+    }
+    return count;
+}
+
+//475
+int cmp(const void *a, const void *b){
+    return *(int*)a - *(int*)b;
+}
+
+int findRadius(int* houses, int housesSize, int* heaters, int heatersSize){
+    if (housesSize < 1 || heatersSize < 1) return 0;
+    qsort(houses, housesSize, sizeof(int), cmp);
+    qsort(heaters, heatersSize, sizeof(int), cmp);
+    int i, d, pos = 0, radius = 0;
+    for (i = 0; i < housesSize; ++i){
+        while (pos < heatersSize - 1 && heaters[pos] < houses[i]) pos++;
+        if (heaters[pos] <= houses[i]){
+            d = houses[i] - heaters[pos];
+            if (d > radius) radius = d;
+        } else {
+            d = heaters[pos] - houses[i];
+            if (pos - 1 >= 0){
+                int d2 = houses[i] - heaters[pos - 1];
+                if (d2 < d) d = d2;
+            }
+            if (d > radius) radius = d;
+        }
+    }
+
+    return radius;
+}
+
+//476
+int findComplement(int num){
+    unsigned int n = num;
+    while ((n & (n - 1)) != 0) n &= (n - 1);
+    n = (n << 1) - 1;
+    return num ^ n;
+}
+
+//482
+char * licenseKeyFormatting(char * S, int K){
+    char *p, *p1=S, *p2=S;
+    int n=0, len=0;
+    while(*p1 != '\0'){
+        if(*p1 != '-'){
+            *p2++ = *p1;
+            len++;
+        }
+        p1++;
+    }
+    *p2='\0';
+    n=len%K;
+    n=n?(K-n):0;
+    p=malloc(len+len/K+1);
+    p2=p;
+    p1=S;
+    while(*p1 != '\0'){
+        if(n < K){
+            *p2 = ((*p1 >= 'a') ? (*p1 - 32) : *p1);
+            n++;
+        }
+        else{
+            *p2++ ='-';
+            *p2 = ((*p1 >= 'a') ? (*p1 - 32) : *p1);
+            n=1;
+        }
+        p2++;
+        p1++;
+    }
+    *p2='\0';
+    return p;
+}
+
+//485
+int findMaxConsecutiveOnes(int* nums, int numsSize){
+    int max = 0;
+    int count = 0;
+    for(int i = 0; i < numsSize; i++){
+        if(nums[i] == 1)
+            count++;
+        else{
+            max = max > count ? max : count;
+            count = 0;
+        }
+    }
+    max = max > count ? max : count;
+    return max;
+}
+
+//492
+int* constructRectangle(int area, int* returnSize){
+    int num = sqrt(area) + 1;
+    while (area % num != 0) num--;
+    *returnSize = 2;
+    int* res = malloc(sizeof(int) * 2);
+    int mid = area / num;
+    if (mid > num) {
+        int temp = num;
+        num = mid;
+        mid = temp;
+    }
+    res[0] = num;
+    res[1] = mid;
+    return res;
+}
+
+//496
+int* nextGreaterElement(int* nums1, int nums1Size, int* nums2, int nums2Size, int* returnSize){
+    *returnSize = nums1Size;
+    if (nums1Size == 0) return NULL;
+    int* res = malloc(sizeof(int) * nums1Size);
+    for (int i = 0; i < nums1Size; i++) {
+        int j = 0;
+        while (nums1[i] != nums2[j]) j++;
+        j++;
+        while (j < nums2Size && nums2[j] <= nums1[i]) j++;
+        if (j < nums2Size) res[i] = nums2[j];
+        else res[i] = -1;
+    }
+    return res;
+}
+
+//500
+char** findWords(char** words, int wordsSize, int* returnSize){
+    char* line1 = "qwertyuiop";
+    char* line2 = "asdfghjkl";
+    char* line3 = "zxcvbnm";
+    int  char_in_line_num = 0;
+    char in_line_flag;
+    char** r    = malloc(wordsSize * sizeof(char*));
+    int    line = 0;
+    for(int i = 0; i < wordsSize; i++){
+        char* w      = words[i];
+        int   pos    = 0;
+        int*  record = malloc((strlen(w) + 1) * sizeof(int));
+        in_line_flag = true;
+        while(*w){  // 记录单词中每个字符所在的行
+            char ch = *w;
+            if(ch >= 'A' && ch <= 'Z')  // 大写变小写
+                ch = *w + ('a' - 'A');
+            if(strchr(line1, ch) != NULL)
+                char_in_line_num = 1;
+            else if(strchr(line2, ch) != NULL)
+                char_in_line_num = 2;
+            else if(strchr(line3, ch) != NULL)
+                char_in_line_num = 3;
+            else
+                char_in_line_num = 10;
+            record[pos++] = char_in_line_num;
+            w++;
+        }
+        //检查每个字符所在行是否一致
+        for(int j = 1; j < strlen(words[i]); j++){
+            if(record[0] != record[j]){
+                in_line_flag = false;
+                break;
+            }
+        }
+        if(in_line_flag){
+            r[line] = malloc((strlen(words[i]) + 1) * sizeof(char));
+            strcpy(r[line], words[i]);
+            line++;
+        }
+        free(record);
+    }
+    *returnSize = line;
+    return r;
+}
+
+//501
+void findMaxSum(struct TreeNode* root, int *prev, int *curr_size, int* max_size, int* res, int* returnSize){
+    if (NULL == root) return;
+    findMaxSum(root->left, prev, curr_size, max_size, res, returnSize);
+    if (*prev == root->val) {     
+        *curr_size += 1;      
+    } else {
+        *curr_size = 1;
+        *prev = root->val;
+    }
+    if (*curr_size == *max_size){
+        res[(*returnSize)++] = *prev;
+    }
+    if (*curr_size > *max_size){
+        *max_size = *curr_size;
+        *returnSize = 0;
+        res[(*returnSize)++] = *prev;
+    }
+    findMaxSum(root->right, prev, curr_size, max_size, res, returnSize);
+}
+int* findMode(struct TreeNode* root, int* returnSize){
+    *returnSize = 0;
+    if (NULL == root) return NULL;
+    int *res = (int*)malloc(10240 * sizeof(int));
+    int max_size = -1;
+    int curr_size = 0;
+    int prev = root->val;
+    findMaxSum(root, &prev, &curr_size, &max_size, res, returnSize);
+    return res;
+}
+
+//504
+char * convertToBase7(int num){
+    char *res = (char*)malloc(13 * sizeof(char));
+    memset(res, 0, 13 * sizeof(char));
+    int i, index = 0;
+    int tmp = num >= 0 ? num : - num;
+    while (tmp) {
+        res[index++] = tmp % 7 + '0';
+        tmp /= 7;
+    }
+    if (num < 0) res[index++] = '-';
+    if (0 == num) res[index++] = '0';
+    for (i = 0; i < index / 2; ++i) {
+        tmp = res[i];
+        res[i] = res[index - 1 - i];
+        res[index - 1- i] = tmp;
+    }
+    return res;
+}
+
+//506
+typedef struct _Data{
+    int index;
+    int val;
+} Data;
+
+int cmp(const void *a, const void *b){
+    return ((Data*)b)->val - ((Data*)a)->val;
+}
+
+char ** findRelativeRanks(int* nums, int numsSize, int* returnSize){
+    *returnSize = numsSize;
+    if (numsSize == 0) return NULL;
+    Data *d = (Data*)malloc(numsSize * sizeof(Data));
+    int i;
+    for (i = 0; i < numsSize; ++i) {
+        d[i].index = i;
+        d[i].val = nums[i];
+    }
+    qsort(d, numsSize, sizeof(Data), cmp);
+    char **res = (char**)malloc(numsSize * sizeof(char*));
+    memset(res, 0, numsSize * sizeof(char*));
+    for (i = 0; i < numsSize; ++i){
+        res[d[i].index] = (char*)malloc(13 * sizeof(char));
+        memset(res[d[i].index], 0, 13 * sizeof(char));
+        switch (i) {
+        case 0:
+            sprintf(res[d[i].index], "Gold Medal");
+            break;
+        case 1:
+            sprintf(res[d[i].index], "Silver Medal");
+            break;
+        case 2:
+            sprintf(res[d[i].index], "Bronze Medal");
+            break;
+        default:
+            sprintf(res[d[i].index], "%d", i + 1);
+            break;
+        }
+    }
+    return res;
+}
+
+//507
+bool checkPerfectNumber(int num){
+    if (0 == num || (num & 1)) return false;
+    int i, sum = 1, sq = sqrt(num);
+    for (i = 2; i < sq; ++i) if (num % i == 0) sum += i + num / i;
+    if (num % sq == 0) sum += (num / sq == sq) ? sq : sq + num / sq;
+    return sum == num;
+}
+
+//509
+int fib(int N){
+    if (N == 0)
+        return 0;
+    if (N == 1)
+        return 1;
+    return fib(N - 1) + fib(N - 2);
+}
+
+//520
+bool detectLetter(char letter){
+    if (letter >= 'A' && letter <= 'Z')
+        return true;
+    else if (letter >= 'a' && letter <= 'z')
+        return false;
+    return false;
+}
+
+bool detectCapitalUse(char* word){
+    if (!word[1])
+        return true;
+    if (detectLetter(word[0]) == false && detectLetter(word[1]) == true)
+        return false;
+    bool flag = detectLetter(word[1]);
+    int i = 2;
+    while (word[i]&&word[i]!='\0'){
+        if (detectLetter(word[i]) != flag)
+            return false;
+        i++;
+    }
+    return true;
+}
+
+//521
+int findLUSlength(char * a, char * b){
+    if (0 == strcmp(a, b))
+        return -1;
+    if (strlen(a) >= strlen(b))
+        return strlen(a);
+    return strlen(b);
+}
+
+//530
+void GetMid(struct TreeNode* root, int *ans, int *size){
+    if (root->left != NULL)
+        GetMid(root->left, ans, size);
+    ans[(*size)++] = root->val;
+    if (root->right != NULL)
+        GetMid(root->right, ans, size);
+}
+
+int getMinimumDifference(struct TreeNode* root){
+    int midSeq[10000] = {0};
+    int size = 0;
+    GetMid(root, midSeq, &size);
+    int ans = INT_MAX;
+    for (int i = 1; i < size; i++) {
+        int tmp = midSeq[i] - midSeq[i - 1];
+        if (tmp < ans)
+            ans = tmp;
+    }
+    return ans;
+}
+
+//532
+int cmp(const void *a, const void *b){
+    return *(int*)b - *(int*)a;
+}
+
+int findPairs(int* nums, int numsSize, int k){
+    if (numsSize < 2 || k < 0) return 0;
+    qsort(nums, numsSize, sizeof(int), cmp);
+    int i, j, curr, count = 0, prev = 0x80000000;
+    for (i = 0; i < numsSize - 1; ++i){
+        if (nums[i] != prev) {
+            prev = nums[i];
+            curr = nums[i] - k;
+            for (j = i + 1; j < numsSize && nums[j] >= curr; ++j) {
+                if (nums[j] == curr) {
+                    count++;
+                    break;
+                }
+            }
+        }
+    }
+    return count;
+}
+
+//538
+void accBST(struct TreeNode *root, int *sum){
+    if (NULL == root) return;
+    accBST(root->right, sum);
+    *sum += root->val;
+    root->val = *sum;
+    accBST(root->left, sum);
+}
+
+struct TreeNode* convertBST(struct TreeNode* root){
+    int sum = 0;
+    accBST(root, &sum);
+    return root;
+}
+
+//541
+char * reverseStr(char * s, int k){
+    int len = strlen(s);
+    for (int i = 0; i < len; i+=k*2) { 
+        if (i+k <= len) overturn(s, i, i+k);
+        else            overturn(s, i, len);
+    }
+    return s;
+}
+
+void overturn(char * str, int fast, int last){
+    int i = fast;
+    int j = last - 1;
+    while (i < j) {
+        str[i]   ^= str[j];
+        str[j]   ^= str[i];
+        str[i++] ^= str[j--];
+    }
+}
+
+//543
+int calMaxRoot(struct TreeNode* root, int *maxRoot){
+    if (NULL == root) return 0;
+    int lLen = calMaxRoot(root->left, maxRoot);
+    int rLen = calMaxRoot(root->right, maxRoot);
+    if (lLen + rLen > *maxRoot) *maxRoot = lLen + rLen;
+    return (lLen > rLen ? lLen : rLen) + 1;
+}
+
+int diameterOfBinaryTree(struct TreeNode* root){
+    int maxRoot = 0;
+    calMaxRoot(root, &maxRoot);
+    return maxRoot;
+}
+
+//557
+char * reverseWords(char * str){
+    if (str == NULL || str[0] == '\0') return str;
+    int fast = 0, last = 0;
+    while (str[fast] && str[fast] == ' ') ++fast; //找字符第一个非空格字符
+    while (str[fast]) {
+        for (last = fast; str[last] && str[last] != ' '; ++last); //找单词的最后一个字符
+        for (int i = fast, j = last-1; i < j; ++i, --j) str[i] ^= str[j] ^= str[i] ^= str[j];//交换
+        for (fast = last; str[fast] && str[fast] == ' '; ++fast); //找单词的第一个字符
+    }
+    return str;
+}
