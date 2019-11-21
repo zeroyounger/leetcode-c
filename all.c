@@ -2008,3 +2008,250 @@ char * reverseWords(char * str){
     }
     return str;
 }
+
+//563
+int NODE_SUMS[10240] = {0};
+int NODE_NUMBER = 0;
+int findTilt(struct TreeNode* root){
+    NODE_NUMBER = 0;
+    for (int i = 0; i < 1024; ++i) NODE_SUMS[i] = 0;
+    node_dfs(root);
+    int sum = 0;
+    for (int i = 0; i < NODE_NUMBER; i++)
+        sum += NODE_SUMS[i];
+    return sum;
+}
+
+int node_dfs(struct TreeNode* root){
+    if (root == NULL) return 0;
+    int left_val = node_dfs(root->left);
+    int right_val = node_dfs(root->right);
+    int tmp = left_val - right_val;
+    tmp = (tmp > 0 ? tmp : -tmp);
+    NODE_SUMS[NODE_NUMBER++] = tmp;//装入缓冲栈中
+    return root->val + left_val + right_val;
+}
+
+//572
+bool isSame(struct TreeNode* s, struct TreeNode* t){
+    if (s == NULL && t == NULL) return true;
+    if (s == NULL || t == NULL) return false;
+    if (s->val == t->val) return isSame(s->left, t->left) && isSame(s->right, t->right);
+    return false;
+}
+bool isSubtree(struct TreeNode* s, struct TreeNode* t){
+    if (s == NULL && t == NULL) return true;
+    if (s != NULL && t == NULL) return true;
+    if (s == NULL) return false;
+    return (isSame(s,t) || isSubtree(s->left, t) || isSubtree(s->right, t));
+}
+
+//575
+int distributeCandies(int* candies, int candiesSize){
+    char map[25001] = {0};
+    int temp = 0,count = 0;
+    int len = 0;
+    for(int i = 0;i<candiesSize;i++){
+        temp = (candies[i] + 100000);//将数缩放到我们数组下标的范围
+        map[temp/8] |= 1 << (temp%8); //数应该在第temp/8+1个字节(即map[temp/8])的第(temp%8)位，使用位运算将标志写入对应的位
+    }
+    for(int i = 0;i<25001;i++){//输入完毕，开始统计有多少种糖果
+        for(int j = 0;j<8;j++){
+            count += (map[i]>>j) & 1;//读取每一位
+        }
+    }
+    return count < candiesSize/2? count:candiesSize/2;
+}
+
+//581
+int findUnsortedSubarray(int* nums, int numsSize){
+    if (numsSize <= 1)
+        return 0;
+    int maxNum = nums[0];
+    int minNum = nums[numsSize - 1];
+    int left;
+    int right;
+    for(int i=0; i<numsSize; i++){
+        if(nums[i]>=maxNum){
+            maxNum = nums[i];
+            continue;
+        }
+        left = i;
+    }
+    for(int i=numsSize-1; i>=0; i--){
+        if(nums[i]<=minNum){
+            minNum = nums[i];
+            continue;
+        }
+        right = i;
+    }
+    return left>right ? left-right+1 : 0;
+}
+
+//583
+int max(int x, int y){
+    return x>y?x:y;
+}
+int minDistance(char * s1, char * s2) {
+    int m = strlen(s1), n = strlen(s2);
+    int (*dp)[n+1]=malloc(sizeof(int)*(m+1)*(n+1));
+    for(int i=0;i!=m+1;i++)
+        for(int j=0;j!=n+1;j++)
+            dp[i][j]=0;
+    for(int i=1;i<=m;i++){
+        for(int j=1;j<=n;j++){
+            if(s1[i-1]==s2[j-1]){
+                dp[i][j]=dp[i-1][j-1]+1;
+            }else{
+                dp[i][j]=max(dp[i-1][j],dp[i][j-1]);
+            }
+        }
+    }
+    return m + n - 2 * dp[m][n];
+}
+
+//594
+int cmp(const void *a, const void *b){
+    return *(int *)a - *(int *)b;
+}
+
+int max(int a, int b){//找两个数中较大的数
+    if(a > b) return a;
+    else return b;
+}
+
+int findLHS(int* nums, int numsSize){
+    if (numsSize < 2) return 0;
+    qsort(nums, numsSize, sizeof(int), cmp);
+    int start = 0;
+    int end;
+    int ret = 0;
+    for (end = 0; end < numsSize; end++) {
+        while (nums[end] - nums[start] > 1) start++;
+        if (nums[end] - nums[start] == 1)
+            ret = max(ret, end - start + 1);
+    }
+    return ret;
+}
+
+//598
+int maxCount(int m, int n, int** ops, int opsSize, int* opsColSize){
+    int i = m;
+    int j = n;
+    if(ops == NULL || opsSize == 0){
+        return i*j;
+    }
+    int idx = 0;
+    for(idx = 0; idx<opsSize; idx++){
+        i = i < ops[idx][0] ? i : ops[idx][0];
+        j = j < ops[idx][1] ? j : ops[idx][1];
+    }
+    return i*j;
+}
+
+//599
+struct hash_node{
+    char *key;
+    int val;
+    struct hash_node* next;
+};
+struct hash_table{
+    struct hash_node** head;
+    int hash_width;
+};
+int hash_init(struct hash_table* table, int hash_width){
+    if (hash_width <= 0) return -1;
+    table->head = (struct hash_node**)malloc(hash_width * sizeof(struct hash_node*));
+    if (!table->head) return -1;
+    memset(table->head, 0, hash_width * sizeof(struct hash_node*));
+    table->hash_width = hash_width;
+    return 0;
+}
+void hash_free(struct hash_table* table){
+    if (table->head){
+        for (int i = 0; i < table->hash_width; ++i){
+            struct hash_node* p = table->head[i];
+            while (p){
+                struct hash_node* tmp = p;
+                p = p->next;
+                free(p);
+            }
+        }
+        free(table->head);
+        table->head = NULL;
+    }
+    table->hash_width = 0;
+}
+int hash_addr(int hash_width, char *key){
+    int k = 0;
+    while (*key) k += *key++;
+    return k % hash_width;
+}
+int hash_insert(struct hash_table* table, char* key, int val){
+    int k = hash_addr(table->hash_width, key);
+    struct hash_node* p = (struct hash_node*)malloc(sizeof(struct hash_node));
+    if (!p) return -1;
+    p->key = key;
+    p->val = val;
+    p->next = table->head[k];
+    table->head[k] = p;
+    return 0;
+}
+struct hash_node* hash_find(struct hash_table* table, char* key){
+    int k = hash_addr(table->hash_width, key);
+    struct hash_node* p = table->head[k];
+    while (p){
+        if (0 == strcmp(p->key, key)) return p;
+        p = p->next;
+    }
+    return NULL;
+}
+char** findRestaurant(char** list1, int list1Size, char** list2, int list2Size, int* returnSize){
+    char** res = NULL;
+    *returnSize = 0;
+    int i, minVal = list1Size + list2Size;
+    struct hash_table table;
+    hash_init(&table, 100);
+    for (i = 0; i < list1Size; ++i){
+        hash_insert(&table, list1[i], i);
+    }
+    for (i = 0; i < list2Size; ++i){
+        struct hash_node* p = hash_find(&table, list2[i]);
+        if (p) {
+            if (i + p->val < minVal){
+                minVal = i + p->val;               
+                res = (char**)realloc(res, sizeof(char*));
+                *returnSize = 0;
+                res[(*returnSize)++] = list2[i];
+            } else if (i + p->val == minVal){
+                res = (char**)realloc(res, (1 + *returnSize) * sizeof(char*));
+                res[(*returnSize)++] = list2[i];
+            }
+        }
+    }
+    return res;
+}
+
+//600
+int findIntegers(int num){
+    int f[32];
+    f[0]=1;
+    f[1]=2;
+    for(int i=2;i<32;i++)
+        f[i]=f[i-1]+f[i-2];
+    int i=30,sum=0,prev_bit=0;
+    while(i>=0){
+        if((num & (1<<i))!=0){
+            sum+=f[i];
+            if(prev_bit==1){
+                sum--;
+                break;
+            }
+            prev_bit=1;
+        }
+        else
+            prev_bit=0;
+        i--;
+    }
+    return sum+1;
+}
