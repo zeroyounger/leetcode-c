@@ -1103,3 +1103,253 @@ bool backspaceCompare(char * s_str, char * t_str){
 int max(int a, int b){
     return a > b ? a : b;
 }
+
+int maxDistToClosest(int* seats, int seatsSize) {
+    int indexOfFirst, indexOfLast, maxDistance = 0;
+    indexOfFirst = indexOfLast = -1;
+    for (int i = 0; i < seatsSize; i++){
+        if(seats[i] == 0)
+            continue;
+        if(-1 == indexOfLast){
+            indexOfFirst = i;
+            indexOfLast = i;
+        }else{
+            maxDistance = max(maxDistance, (i - indexOfLast)/2);
+            indexOfLast = i;
+        }
+    }
+    return max(indexOfFirst, max(maxDistance, seatsSize - 1 - indexOfLast));
+}
+
+//852
+int peakIndexInMountainArray(int* A, int ASize){
+    int l = 0, r = ASize;
+    for(int i=(l+r)/2;l<=r;i=(l+r)/2){
+        if(i>0&&A[i-1]>A[i])
+            r = i-1;
+        else if(i+1<ASize&&A[i+1]>A[i])
+            l = i+1;
+        else
+            return i;
+    }
+    return -1;
+}
+
+//859
+bool buddyStrings(char * A, char * B){
+    int len1=strlen(A),len2=strlen(B);
+    int i,j=0,count=0,dex[2]={0};
+    char temp;
+    if(len1!=len2)
+        return 0;
+    int num[27],max=0;
+    memset(num,0,27);
+    for(i=0;i<len1;i++){
+        if(A[i]!=B[i]){
+           count++;
+            if(count>2)
+                return 0;
+            dex[j++]=i;
+        }
+        num[A[i]-'a']++;
+        if(num[A[i]-'a']>max);
+        max=num[A[i]-'a'];
+    }
+    if(count==0&&max>=2)
+        return 1;
+    else if(count==2)
+    {temp=A[dex[0]];
+    A[dex[0]]=A[dex[1]];
+    A[dex[1]]=temp;
+    if(strcmp(A,B)==0)
+        return 1;}
+      return 0;
+}
+
+//860
+bool lemonadeChange(int* bills, int billsSize){
+    int i = 0;
+    int cnt5  = 0;  // 记录5元钞的数量
+    int cnt10 = 0;  // 记录10元钞的数量
+    if (bills == NULL || billsSize < 0 || billsSize > 10000)
+        return false;
+    for (i = 0; i < billsSize; i++) {
+        if (bills[i] == 5)
+            cnt5++;
+        if (bills[i] == 10) {
+            cnt5--;
+            cnt10++;
+            if (cnt5 < 0)
+                return false;
+        }
+        if (bills[i] == 20) {
+            if (!((cnt5 > 0 && cnt10 > 0) || (cnt5 > 2 && cnt10 == 0)))
+                return false;
+            if (cnt10 > 0) {
+                cnt10--;
+                cnt5--;
+            }else
+                cnt5 -= 3;
+            if (cnt5 < 0)
+                return false;
+        }
+    }
+    return true;    
+}
+
+//867
+int** transpose(int** A, int ASize, int* AColSize, int* returnSize, int** returnColumnSizes){
+    if( A == NULL )
+        return NULL;
+    int **res = (int**)malloc(sizeof(int*)*(*AColSize));
+    returnColumnSizes[0] = (int*)malloc(sizeof(int)*(*AColSize));
+    *returnSize = *AColSize;
+    //分配内存
+    for( int i = 0; i < *AColSize; i++ ){
+        res[i] = (int*)malloc(sizeof(int)*ASize);
+        returnColumnSizes[0][i] = ASize;
+    }
+    //矩阵转置
+    for( int i = 0; i < ASize; i++ )
+        for( int j = 0; j < *AColSize; j++ )
+            res[j][i] = A[i][j];
+    return res;
+}
+
+//868
+int binaryGap(int N){
+    int A[32];
+    int t = 0;
+    for (int i = 0; i < 32; ++i)
+        if (((N >> i) & 1) != 0)
+            A[t++] = i;
+
+    int ans = 0;
+    for (int i = 0; i < t - 1; ++i)
+        ans = ans > (A[i+1] - A[i]) ? ans : (A[i+1] - A[i]);
+    return ans;
+}
+
+//874
+int dx[4] = {0, 1, 0, -1};
+int dy[4] = {1, 0, -1, 0};
+
+int compare(const void *a, const void *b){
+    return *(int*)a - *(int*)b;
+}
+
+bool canReach(int val, int *arr, int size){
+    if (size == 0)
+        return true;
+    int *p = bsearch(&val, arr, size, sizeof(int), compare);
+    if (p == NULL)
+        return true;
+    return false;
+}
+
+int robotSim(int* commands, int commandsSize, int** obstacles, int obstaclesSize, int* obstaclesColSize){
+    if ((commands == NULL) || (commandsSize == 0) || (obstacles == NULL) || (obstaclesSize < 0) || (obstaclesColSize == NULL)) 
+        return 0;
+    int num;
+    if (obstaclesSize > 0)
+        num = obstaclesSize;
+    else
+        num = 1;
+    int arr[num];
+    for (int k = 0; k < obstaclesSize; k++)
+        arr[k] = obstacles[k][0] + obstacles[k][1] *30000;
+    qsort(arr, obstaclesSize, sizeof(int), compare);
+    int di = 0, x = 0, y = 0;
+    int ans = 0;
+    int val = 0;
+    for (int i = 0; i < commandsSize; i++) {
+        if (commands[i] == -1) {
+            di = (di + 1) % 4;
+        } else if (commands[i] == -2){
+            di = (di + 3) % 4;
+        } else {
+            for (int j = 0; j < commands[i]; j++) {
+                val = (x + dx[di]) + 30000 * (y + dy[di]);
+                if ((obstaclesSize == 0) || (canReach(val, arr, obstaclesSize))) {
+                    x += dx[di];
+                    y += dy[di];
+                    
+                    if ((x*x + y*y) > ans) {
+                        ans = x*x + y*y;
+                    }
+                }
+            }
+        }
+    }
+    return ans;
+}
+
+//876
+struct ListNode* middleNode(struct ListNode* head){
+    if(head == NULL)return;
+    struct ListNode* fast = head;
+    struct ListNode* slow = head;
+    while(fast && fast->next){
+        fast = fast->next->next;
+        slow = slow->next;
+    }
+    return slow;
+}
+
+//883
+#define max(a,b) (((a) > (b)) ? (a) : (b))
+int projectionArea(int** grid, int gridSize, int* gridColSize){
+    int N = gridSize;
+    int ans = 0;
+    for (int i = 0; i < N;  ++i) {
+        int bestRow = 0;  // largest of grid[i][j]
+        int bestCol = 0;  // largest of grid[j][i]
+        for (int j = 0; j < N; ++j) {
+            if (grid[i][j] > 0) ans++;  // top shadow
+            bestRow = max(bestRow, grid[i][j]);
+            bestCol = max(bestCol, grid[j][i]);
+        }
+        ans += bestRow + bestCol;
+    }
+    return ans;
+}
+
+//888
+int cmp(int* a, int* b){
+    if(*a < *b) return -1;
+    else if(*a == *b) return 0;
+    else return 1;
+}
+int* fairCandySwap(int* A, int ASize, int* B, int BSize, int* returnSize){
+    qsort(A, ASize, sizeof(int), cmp);
+    qsort(B, BSize, sizeof(int), cmp);
+    
+    int i = 0;
+    int sumA = 0;
+    for(i = 0; i<ASize; i++){
+        sumA += A[i];
+    }
+    int sumB = 0;
+    for(i = 0; i<BSize; i++){
+        sumB += B[i];
+    }
+    int delta = sumA - sumB;
+    int target_delta = delta/2;
+    i = 0;
+    int j = 0;
+    while(i<ASize && j<BSize){
+        int tmp_delta = A[i] - B[j];
+        if(tmp_delta > target_delta){
+            j++;
+        } else if(tmp_delta < target_delta){
+            i++;
+        } else {
+            break;
+        }
+    }
+    int *ret = (int*)malloc(sizeof(int) *2);
+    ret[0] = A[i];
+    ret[1] = B[j];
+    *returnSize = 2;
+    return ret;
+}
